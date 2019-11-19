@@ -23,7 +23,7 @@ echo '</h1>';
 			);
 
 			$tabs       = apply_filters( 'edd_add_ons_tabs', $tabs );
-			$active_tab = isset( $_GET['page'] ) && $_GET['page'] === 'Settings-page' ? 'hfe_settings':'hfe_templates';
+			$active_tab = isset( $_GET['page'] ) && $_GET['page'] === 'Settings- ' ? 'hfe_settings':'hfe_templates';
 			foreach( $tabs as $tab_id => $tab ) {
 
 				$active = $active_tab == $tab_id ? ' nav-tab-active' : '';

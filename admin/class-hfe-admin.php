@@ -50,8 +50,46 @@ class HFE_Admin {
 		add_filter( 'manage_elementor-hf_posts_columns', [ $this, 'set_shortcode_columns' ] );
 		add_action( 'manage_elementor-hf_posts_custom_column', [ $this, 'render_shortcode_column' ], 10, 2 );
 		add_filter( 'views_edit-elementor-hf', [ $this, 'hfe_settings' ], 10, 1 );
+
+		add_action('admin_init', [ $this,'plugin_admin_init']);
+		
 	}
 
+	public function plugin_admin_init(){
+		register_setting( 'hfe-plugin-options', 'hfe_compatibility_option');
+		add_settings_section('hfe-options', 'Compatibility option', [ $this,'hfe_compatibility_callback'], 'Settings');
+		 add_settings_field('hfe-way', 'Select the way of Compatibility', [ $this,'hfe_compatibility_option_callback'], 'Settings', 'hfe-options');
+		}
+
+	public function hfe_compatibility_callback() {
+	
+	echo "This setting allows you to select the way for compatibility.	";
+	}
+
+	public function hfe_compatibility_option_callback(){
+		$hfe_radio_button = get_option( 'hfe_compatibility_option', '1' );
+						?><label>
+						<input type="radio" name="hfe_compatibility_option" value= 1 <?php checked( $hfe_radio_button, 1 ); ?> > <div class="hfe_radio_options"><?php esc_html_e( 'Elementor way', 'header-footer-elementor' ); ?></div>
+						<p class="description"><?php esc_html_e( 'This replaces the header.php & footer.php template with a custom templates from the plugin.', 'header-footer-elementor' ); ?></p><br></label>
+					<label>
+						<input type="radio" name="hfe_compatibility_option" value= 2 <?php checked( $hfe_radio_button, 2 ); ?> > <div class="hfe_radio_options"><?php esc_html_e( 'Using action wp_body_opens', 'header-footer-elementor' ); ?></div>
+						<p class="description">
+						<?php esc_html_e( 'This adds the header in the new action that was introduced by WordPress `wp_body_option` and footer is added in wp_footer action.', 'header-footer-elementor' ); ?>
+						</p></label><?php
+		// echo '	<label>
+		// 				<input type="radio" name="hfe_radio_button" value= 1 '. checked( $hfe_radio_button, 1 );  .'> <div class="hfe_radio_options">'. esc_html_e( 'Elementor way', 'header-footer-elementor' ); .'</div>
+		// 				<p class="description">'. esc_html_e( 'This replaces the header.php & footer.php template with a custom templates from the plugin.', 'header-footer-elementor' ); .'</p><br></label>
+			
+		// 			<label>
+		// 				<input type="radio" name="hfe_radio_button" value= 2 '. checked( $hfe_radio_button, 2 ); .' > <div class="hfe_radio_options">'. esc_html_e( 'Using action wp_body_opens', 'header-footer-elementor' ); .'</div>
+		// 				<p class="description">
+		// 				'. esc_html_e( 'This adds the header in the new action that was introduced by WordPress wp_body_option and footer is added in wp_footer action.', 'header-footer-elementor' ); .'
+		// 				</p></label>';
+
+						// echo '<input type="radio" name="hfe_compatibility_option" value = 1 >';
+						// echo '<input type="radio" name="hfe_compatibility_option" value = 2 >';
+
+	}
 	/**
 	 * Register Post type for header footer templates
 	 */
@@ -106,18 +144,7 @@ class HFE_Admin {
 			'edit.php?post_type=elementor-hf'
 		);
 
-		add_submenu_page( 
-			'edit.php?post_type=elementor-hf',
-			__( 'Settings', 'header-footer-elementor' ),
-			__( 'Settings', 'header-footer-elementor' ),
-		   'admin',
-		    'hfe-settings',
-		    array( $this, 'hfe_tabs' )
-		);
-
-		add_menu_page(
-
-
+		add_menu_page(	
 			__( 'Settings', 'header-footer-elementor' ),
 			__( 'Settings', 'header-footer-elementor' ),
 			'manage_options',
@@ -137,7 +164,47 @@ class HFE_Admin {
 	}
 
 	function hfe_settings_page(){
-		require_once HFE_DIR . 'inc/hfe-settings-page.php';
+
+		echo '<h1 class="wp-heading-inline">';
+		esc_attr_e( 'Elementor Header Footer ' , 'header-footer-elementor' );
+		echo '</h1>';
+
+	?><h2 class="nav-tab-wrapper">
+			<?php
+			$tabs = array(
+				'hfe_templates' => array(
+					'name' => __( 'All templates', 'header-footer-elementor' ),
+					'url'  => admin_url( 'edit.php?post_type=elementor-hf' ),
+				),
+				'hfe_settings' => array(
+					'name' => __( 'Settings', 'header-footer-elementor' ),
+					'url'  => admin_url( 'admin.php?page=Settings-page' ),
+				),
+			);
+
+			$tabs       = apply_filters( 'edd_add_ons_tabs', $tabs );
+			$active_tab = isset( $_GET['page'] ) && $_GET['page'] === 'Settings- ' ? 'hfe_settings':'hfe_templates';
+			foreach( $tabs as $tab_id => $tab ) {
+
+				$active = $active_tab == $tab_id ? ' nav-tab-active' : '';
+
+				echo '<a href="' . esc_url( $tab['url'] ) . '" class="nav-tab' . $active . '">';
+				echo esc_html( $tab['name'] );
+				echo '</a>';
+			}
+
+			?>
+		</h2>
+		<br />
+		<?php
+		$hfe_radio_button = get_option( 'hfe_compatibility_option', '1' );
+		var_dump(get_option( 'hfe_compatibility_option'));
+		?>
+		<form action="options.php" method="post">
+		<?php settings_fields('hfe-plugin-options'); ?>
+		<?php do_settings_sections('Settings'); ?>
+		<?php submit_button(); ?>
+</form></div><?php
 	}
 
 	public function hfe_tabs(){
